@@ -1,0 +1,2 @@
+crontab==0.21.3
+MySQL-python==1.2.5
