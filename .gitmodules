@@ -1,3 +1,6 @@
 [submodule "TSL2561"]
 	path = TSL2561
 	url = https://github.com/janheise/TSL2561
+[submodule "quick2wire-python-api"]
+	path = quick2wire-python-api
+	url = https://github.com/quick2wire/quick2wire-python-api.git
