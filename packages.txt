@@ -1,6 +1,5 @@
 crontab==0.21.3
 oursql3==0.9.4
-quick2wire-api==0.0.0.2
 cycler==0.10.0
 matplotlib==1.5.3
 numpy==1.11.2
