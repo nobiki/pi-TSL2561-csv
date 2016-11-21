@@ -6,14 +6,14 @@ import logging
 from datetime import datetime, timedelta
 from crontab import CronTab
 
-sys.path.append("TSL2561")
-
-from TSL2561 import *
-from TSL2561_logger import *
-
-
-tsl = TSL2561()
-logger = TSL2561_logger()
+# sys.path.append("TSL2561")
+#
+# from TSL2561 import *
+# from TSL2561_logger import *
+#
+#
+# tsl = TSL2561()
+# logger = TSL2561_logger()
 
 def sample_oursql():
     import oursql
@@ -23,11 +23,11 @@ def sample_oursql():
             user='9zilla',
             passwd='9zilla').cursor() as cur:
 
-        print(cur.execute('SELECT * FROM luxes'))
+        cur.execute('SELECT * FROM luxes')
         res = cur.fetchall()
 
         for row in res:
-            print(row)
+            print(row[2])
 
 
 sample_oursql()
