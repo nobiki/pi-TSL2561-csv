@@ -8,13 +8,21 @@ from crontab import CronTab
 
 
 def main():
-    print(datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-    # # 処理2を２分毎に実行する。
-    cron_2min = CronTab("*/2 * * * *")
+    # print(datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
 
-    print(dir(cron_2min))
+    # system_cron = CronTab()
+    user_cron = CronTab('9zilla')
+    # mem_cron = CronTab(tab="*/2 * * * * date")
 
-    cron_2min.next()
+    job = user_cron.new(command='/bin/date')
+    job.hour.every(2)
+    job.enable()
+    print( job.is_valid() )
+
+    user_cron.write('tsl2561.tab')
+
+    tab = CronTab(tabfile='tsl2561.tab')
+
 
 if __name__ == "__main__":  # memo: スクリプトとして直接呼び出した時のみ実行し、別のモジュールから呼び出された時（インポート）には実行しないif文
 
