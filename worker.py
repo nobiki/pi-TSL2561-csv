@@ -17,7 +17,7 @@ sys.path.append("TSL2561")
 from TSL2561 import *
 tsl = TSL2561()
 
-INTERVAL_SEC = 2
+INTERVAL_SEC = 60
 
 ##############################
 ### Sub processes          ###
@@ -49,8 +49,14 @@ class SubProcess(object) :
                 user=db["user"],
                 passwd=db["pass"]).cursor() as cur:
 
-            cur.execute('SELECT * FROM luxes limit 1')
-            res = cur.fetchall()
+            now = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+            lux = str(self.getLux())
+
+            sql = "insert into " + db["name"] +".luxes" \
+                    " (recorded_at, lux, created_at, updated_at)" \
+                    " values" \
+                    " ('"+now+"',"+lux+",'"+now+"','"+now+"')"
+            res = cur.execute(sql)
         return res
 
     def run(self, inc_q, stop_flag) :
@@ -70,9 +76,10 @@ class SubProcess(object) :
             count += 1
             inc_q.put(self.first + self.step * count)
 
+            # debug print
             print( datetime.now().strftime("%Y/%m/%d %H:%M:%S") + ": " + str(self.getLux()) )
 
-            print( self.saveLux() )
+            self.saveLux()
 
             # print("Executing subprocess..." + datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
 
