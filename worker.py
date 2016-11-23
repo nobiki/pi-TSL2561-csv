@@ -31,7 +31,9 @@ class SubProcess(object) :
         visible = tsl.getLuminosity(tsl.VISIBLE)
         infrared = tsl.getLuminosity(tsl.INFRARED)
 
-        print("Lux: %d" % tsl.calculateLux(full, infrared) )
+        # print("Lux: %d" % tsl.calculateLux(full, infrared) )
+        lux = tsl.calculateLux(full, infrared)
+        return lux
 
     def run(self, inc_q, stop_flag) :
 
@@ -43,14 +45,16 @@ class SubProcess(object) :
 
         count = 0
         while True :
+            time.sleep(INTERVAL_SEC)
+
             if stop_flag.is_set() :
                 break
-
             count += 1
             inc_q.put(self.first + self.step * count)
 
-            time.sleep(INTERVAL_SEC)
-            print("Executing subprocess..." + datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+            print( datetime.now().strftime("%Y/%m/%d %H:%M:%S") + ": " + str(self.getLux()) )
+
+            # print("Executing subprocess..." + datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
 
         print( "Stop subprocess." )
 
