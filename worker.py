@@ -69,11 +69,12 @@ class TSL2561Logger(object) :
 
         # insert binary(base64)
         now = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-        graph64 = base64.b64encode("luxes.png")
+        graphfile = open('luxes.png', 'rb').read()
+        graph64 = base64.b64encode(graphfile).decode('utf-8')
 
         sql = "update " + db["name"] +".graphs" \
                 " set" \
-                " graph64 = '"+graph64+"',"
+                " graph64 = '"+graph64+"'," \
                 " updated_at = '"+now+"' where id = 1"
 
         cur.execute(sql)
