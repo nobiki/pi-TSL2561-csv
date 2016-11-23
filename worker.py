@@ -3,6 +3,7 @@
 import sys
 import signal
 import time
+import base64
 
 import oursql
 import yaml
@@ -58,6 +59,7 @@ class TSL2561Logger(object) :
     def saveLux2Graph(self,conn):
         cur = conn.cursor()
 
+        # Output Graph image
         sql = "select recorded_at, lux from luxes order by recorded_at desc limit 288"
 
         df = pd.read_sql(sql,conn)
@@ -65,9 +67,21 @@ class TSL2561Logger(object) :
         df.plot(x='recorded_at')
         plt.pyplot.savefig("luxes.png")
 
+        # insert binary(base64)
+        now = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+        graph64 = base64.b64encode("luxes.png")
+
+        sql = "update " + db["name"] +".graphs" \
+                " set" \
+                " graph64 = '"+graph64+"',"
+                " updated_at = '"+now+"' where id = 1"
+
+        cur.execute(sql)
+
     def saveLux2Database(self,conn):
         cur = conn.cursor()
 
+        # insert lux(from pi)
         now = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         lux = str(self.getLux())
 
