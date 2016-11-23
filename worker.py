@@ -4,6 +4,8 @@ import sys
 import signal
 import time
 
+import oursql
+
 from datetime import datetime
 from multiprocessing import Process, Queue, Event
 
@@ -35,6 +37,18 @@ class SubProcess(object) :
         lux = tsl.calculateLux(full, infrared)
         return lux
 
+    def saveLux(self):
+        with oursql.connect(
+                host='192.168.11.16',
+                port=19036,
+                db='tsl2561_stats_production',
+                user='9zilla',
+                passwd='9zilla').cursor() as cur:
+
+            cur.execute('SELECT * FROM luxes limit 1')
+            res = cur.fetchall()
+        return res
+
     def run(self, inc_q, stop_flag) :
 
         ### Signal disable
@@ -53,6 +67,8 @@ class SubProcess(object) :
             inc_q.put(self.first + self.step * count)
 
             print( datetime.now().strftime("%Y/%m/%d %H:%M:%S") + ": " + str(self.getLux()) )
+
+            print( self.saveLux() )
 
             # print("Executing subprocess..." + datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
 
