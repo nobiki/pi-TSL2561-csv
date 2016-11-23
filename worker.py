@@ -5,6 +5,7 @@ import signal
 import time
 
 import oursql
+import yaml
 
 from datetime import datetime
 from multiprocessing import Process, Queue, Event
@@ -38,12 +39,16 @@ class SubProcess(object) :
         return lux
 
     def saveLux(self):
+        f = open("database.yml", 'r')
+        db = yaml.load(f)
+        f.close()
+
         with oursql.connect(
-                host='192.168.11.16',
-                port=19036,
-                db='tsl2561_stats_production',
-                user='9zilla',
-                passwd='9zilla').cursor() as cur:
+                host=db["host"],
+                port=db["port"],
+                db=db["name"],
+                user=db["user"],
+                passwd=db["pass"]).cursor() as cur:
 
             cur.execute('SELECT * FROM luxes limit 1')
             res = cur.fetchall()
