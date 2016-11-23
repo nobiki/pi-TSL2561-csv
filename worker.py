@@ -6,6 +6,9 @@ import time
 
 import oursql
 import yaml
+f = open("database.yml", 'r')
+db = yaml.load(f)
+f.close()
 
 from datetime import datetime
 from multiprocessing import Process, Queue, Event
@@ -39,10 +42,6 @@ class SubProcess(object) :
         return lux
 
     def saveLux(self):
-        f = open("database.yml", 'r')
-        db = yaml.load(f)
-        f.close()
-
         with oursql.connect(
                 host=db["host"],
                 port=db["port"],
