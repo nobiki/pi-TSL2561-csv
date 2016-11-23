@@ -10,6 +10,10 @@ f = open("database.yml", 'r')
 db = yaml.load(f)
 f.close()
 
+import pandas as pd
+import matplotlib as plt
+plt.use('Agg')
+
 from datetime import datetime
 from multiprocessing import Process, Queue, Event
 
@@ -20,9 +24,9 @@ tsl = TSL2561()
 INTERVAL_SEC = 60 * 5
 
 ##############################
-### Sub processes          ###
+### TSL2561Logger Class
 ##############################
-class SubProcess(object) :
+class TSL2561Logger(object) :
 
     def __init__(self) :
         self.first = 0
@@ -41,23 +45,38 @@ class SubProcess(object) :
         lux = tsl.calculateLux(full, infrared)
         return lux
 
-    def saveLux(self):
-        with oursql.connect(
+    def saveLuxData(self):
+        conn = oursql.connect(
                 host=db["host"],
                 port=db["port"],
                 db=db["name"],
                 user=db["user"],
-                passwd=db["pass"]).cursor() as cur:
+                passwd=db["pass"])
+        self.saveLux2Database(conn)
+        self.saveLux2Graph(conn)
 
-            now = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-            lux = str(self.getLux())
+    def saveLux2Graph(self,conn):
+        cur = conn.cursor()
 
-            sql = "insert into " + db["name"] +".luxes" \
-                    " (recorded_at, lux, created_at, updated_at)" \
-                    " values" \
-                    " ('"+now+"',"+lux+",'"+now+"','"+now+"')"
-            res = cur.execute(sql)
-        return res
+        sql = "select recorded_at, lux from luxes order by recorded_at desc limit 288"
+
+        df = pd.read_sql(sql,conn)
+
+        df.plot(x='recorded_at')
+        plt.pyplot.savefig("luxes.png")
+
+    def saveLux2Database(self,conn):
+        cur = conn.cursor()
+
+        now = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+        lux = str(self.getLux())
+
+        sql = "insert into " + db["name"] +".luxes" \
+                " (recorded_at, lux, created_at, updated_at)" \
+                " values" \
+                " ('"+now+"',"+lux+",'"+now+"','"+now+"')"
+
+        cur.execute(sql)
 
     def run(self, inc_q, stop_flag) :
 
@@ -77,7 +96,7 @@ class SubProcess(object) :
             # debug print
             print( datetime.now().strftime("%Y/%m/%d %H:%M:%S") + ": " + str(self.getLux()) )
 
-            self.saveLux()
+            self.saveLuxData()
 
             time.sleep(INTERVAL_SEC)
 
@@ -85,7 +104,7 @@ class SubProcess(object) :
 
 
 ##############################
-### Main                   ###
+### Main
 ##############################
 if __name__ == '__main__' :
 
@@ -101,7 +120,7 @@ if __name__ == '__main__' :
 
 
 		### Sub processes
-		sub1 = SubProcess()
+		sub1 = TSL2561Logger()
 
 		sub1_process = Process(target = sub1.run, args = (inc_q, stop_flag))
 
