@@ -2,31 +2,35 @@
 import sys
 import time
 import logging
-
+from multiprocessing import Pool
 from datetime import datetime, timedelta
 from crontab import CronTab
 
+def hoge(self):
+    print(datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+    return 1
 
-def main():
-    # print(datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+p = Pool(2)
 
-    # system_cron = CronTab()
-    user_cron = CronTab('9zilla')
-    # mem_cron = CronTab(tab="*/2 * * * * date")
+p.map(hoge, [1,2,3])
 
-    job = user_cron.new(command='/bin/date')
-    job.hour.every(2)
-    job.enable()
-    print( job.is_valid() )
-
-    user_cron.write('tsl2561.tab')
-
-    tab = CronTab(tabfile='tsl2561.tab')
-
-
-if __name__ == "__main__":  # memo: スクリプトとして直接呼び出した時のみ実行し、別のモジュールから呼び出された時（インポート）には実行しないif文
-
-   main()
+#     # system_cron = CronTab()
+#     user_cron = CronTab('9zilla')
+#     # mem_cron = CronTab(tab="*/2 * * * * date")
+#
+#     job = user_cron.new(command='/bin/date')
+#     job.hour.every(2)
+#     job.enable()
+#     print( job.is_valid() )
+#
+#     user_cron.write('tsl2561.tab')
+#
+#     tab = CronTab(tabfile='tsl2561.tab')
+#
+#
+# if __name__ == "__main__":  # memo: スクリプトとして直接呼び出した時のみ実行し、別のモジュールから呼び出された時（インポート）には実行しないif文
+#
+#    main()
 
 ### quickwire-i2c
 # sys.path.append("TSL2561")
