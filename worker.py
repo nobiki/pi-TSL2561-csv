@@ -17,7 +17,7 @@ sys.path.append("TSL2561")
 from TSL2561 import *
 tsl = TSL2561()
 
-INTERVAL_SEC = 60
+INTERVAL_SEC = 60 * 5
 
 ##############################
 ### Sub processes          ###
@@ -69,8 +69,6 @@ class SubProcess(object) :
 
         count = 0
         while True :
-            time.sleep(INTERVAL_SEC)
-
             if stop_flag.is_set() :
                 break
             count += 1
@@ -81,9 +79,9 @@ class SubProcess(object) :
 
             self.saveLux()
 
-            # print("Executing subprocess..." + datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+            time.sleep(INTERVAL_SEC)
 
-        print( "Stop subprocess." )
+        print( "Stop subprocess..." )
 
 
 ##############################
