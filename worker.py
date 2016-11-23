@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import sys
 import signal
 import time
 
+from datetime import datetime
 from multiprocessing import Process, Queue, Event
+
+sys.path.append("TSL2561")
+from TSL2561 import *
+tsl = TSL2561()
 
 INTERVAL_SEC = 2
 
@@ -16,6 +21,17 @@ class SubProcess(object) :
     def __init__(self) :
         self.first = 0
         self.step  = 1
+
+    def getLux(self):
+        tsl.setGain(tsl.GAIN_16X);
+        tsl.setTiming(tsl.INTEGRATIONTIME_13MS)
+
+        x = tsl.getFullLuminosity()
+        full = tsl.getLuminosity(tsl.FULLSPECTRUM)
+        visible = tsl.getLuminosity(tsl.VISIBLE)
+        infrared = tsl.getLuminosity(tsl.INFRARED)
+
+        print("Lux: %d" % tsl.calculateLux(full, infrared) )
 
     def run(self, inc_q, stop_flag) :
 
@@ -34,52 +50,58 @@ class SubProcess(object) :
             inc_q.put(self.first + self.step * count)
 
             time.sleep(INTERVAL_SEC)
-            print("Executing subprocess...")
+            print("Executing subprocess..." + datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
 
         print( "Stop subprocess." )
+
 
 ##############################
 ### Main                   ###
 ##############################
 if __name__ == '__main__' :
 
-    ### Queue
-    inc_q = Queue()
-    mul_q = Queue()
+	if tsl.foundSensor():
+		print("Found sensor...")
 
-    ### Event
-    stop_flag = Event()
+		### Queue
+		inc_q = Queue()
+		mul_q = Queue()
 
-
-    ### Sub processes
-    sub1 = SubProcess()
-
-    sub1_process = Process(target = sub1.run, args = (inc_q, stop_flag))
-
-    ### Start sub processes
-    # processes = [sub1_process, sub2_process, sub3_process]
-    processes = [sub1_process]
-    for p in processes :
-        p.start()
+		### Event
+		stop_flag = Event()
 
 
-    ### Signal settings
-    def signalHandler(signal, handler) :
-        stop_flag.set()
+		### Sub processes
+		sub1 = SubProcess()
 
-    signal.signal(signal.SIGINT,  signalHandler)
-    signal.signal(signal.SIGTERM, signalHandler)
+		sub1_process = Process(target = sub1.run, args = (inc_q, stop_flag))
 
-    ### Wait subprocess stop
-    while True :
-        alive_flag = False
-        for p in processes :
-            if p.is_alive() :
-                alive_flag = True
-                break
-        if alive_flag :
-            time.sleep(0.1)
-            continue
-        break
+		### Start sub processes
+		# processes = [sub1_process, sub2_process, sub3_process]
+		processes = [sub1_process]
+		for p in processes :
+			p.start()
 
-    print( "Complete !!!" )
+		### Signal settings
+		def signalHandler(signal, handler) :
+			stop_flag.set()
+
+		signal.signal(signal.SIGINT,  signalHandler)
+		signal.signal(signal.SIGTERM, signalHandler)
+
+		### Wait subprocess stop
+		while True :
+			alive_flag = False
+			for p in processes :
+				if p.is_alive() :
+					alive_flag = True
+					break
+			if alive_flag :
+				time.sleep(0.1)
+				continue
+			break
+
+		print( "Complete !!!" )
+
+	else:
+		print("No sensor?")
