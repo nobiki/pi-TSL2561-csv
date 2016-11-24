@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import os
 import sys
 import signal
 import time
@@ -7,7 +8,7 @@ import base64
 
 import oursql
 import yaml
-f = open("database.yml", 'r')
+f = open(os.path.dirname(__file__)+"database.yml", 'r')
 db = yaml.load(f)
 f.close()
 
@@ -65,11 +66,11 @@ class TSL2561Logger(object) :
         df = pd.read_sql(sql,conn)
 
         df.plot(x='recorded_at')
-        plt.pyplot.savefig("luxes.png")
+        plt.pyplot.savefig(os.path.dirname(__file__)+"luxes.png")
 
         # insert binary(base64)
         now = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-        graphfile = open('luxes.png', 'rb').read()
+        graphfile = open(os.path.dirname(__file__)+"luxes.png", 'rb').read()
         graph64 = base64.b64encode(graphfile).decode('utf-8')
 
         sql = "update " + db["name"] +".graphs" \
