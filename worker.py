@@ -19,7 +19,7 @@ plt.use('Agg')
 from datetime import datetime
 from multiprocessing import Process, Queue, Event
 
-sys.path.append("TSL2561")
+sys.path.append(os.path.dirname(__file__)+"/TSL2561")
 from TSL2561 import *
 tsl = TSL2561()
 
