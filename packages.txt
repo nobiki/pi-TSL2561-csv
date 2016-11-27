@@ -8,4 +8,6 @@ pyparsing==2.1.10
 python-dateutil==2.5.3
 pytz==2016.7
 PyYAML==3.12
+quick2wire-api==0.0.0.2
 six==1.10.0
+uWSGI==2.0.14
